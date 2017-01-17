@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+</head>
+<body>
+  
+
+
+
+<div id="buttonList"></div>
+
+<form id="movie-form">
+    <label for="movie-input">Add a Movie</label>
+    <input type="text" id="movie-input"><br>
+    
+    <!-- Button triggers new movie to be added -->
+    <input id="addMovie" type="button" value="Add a Movie Bro" onclick="addButton();"/>
+  </form>
+
+  <div id="imgList"></div>
+  <script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+  <script type="text/javascript">
+
+  var topics = ["Harry Potter",
+                    "Draco Malfoy",
+                    "Hermione Granger",
+                    "Ron Weasley",
+                    "Albus Dumbledore",
+                    "Severus Snape",
+                    "Hagrid"];
+
+  var imageSrcStill = [];
+  var imageSrcAnimated = [];
+
+  buildButtonList();                    
+              
+  function buildButtonList() {
+
+    
+  
+    var btnList = $("#buttonList");
+
+    btnList.html("");
+
+    for (var i = 0; i < topics.length; i++) {
+
+      // loop needs to append a button for each string in the array
+      var newBtn = $("<input id='btnTopics" + i.toString() + "'' type='button' value='" + topics[i] + "' onclick='apiCall(this);' />");
+      btnList.append(newBtn);
+    }
+  }
+
+     function apiCall(pThis) {
+
+      imageSrcStill = [];
+      imageSrcAnimated = [];
+
+      var queryURL = "http://api.giphy.com/v1/gifs/search?q=" + 
+      encodeURIComponent(pThis.value) + "&api_key=dc6zaTOxFJmzC&limit=10&rating=pg-13&fmt=json";
+
+      //
+      $.ajax({
+        url: queryURL,
+        method: "GET"
+      })
+
+      //
+      .done(function(response) {
+
+        //
+        var data = response.data;
+
+        //
+        var imgList = $("#imgList");
+
+        imgList.html("");
+
+        var ul = $("<ul/>");
+
+        for(j = 0; j < 10; j++) {
+
+          var li = $("<li/>")
+          var lbl = $("<label>Rating: " + data[j].rating + "</label>");
+          var br = $("<br/>");
+          var img = $("<img id='img" + j.toString() + "' src='" + data[j].images.downsized_still.url + "' onclick='imgClick(" + j.toString() + ", this);' data-state='still' />");
+
+          imageSrcStill.push(data[j].images.downsized_still.url);
+          imageSrcAnimated.push(data[j].images.downsized.url);
+
+          li.append(lbl);
+          li.append(br);
+          li.append(img);
+
+          imgList.append(li);
+        }
+
+        imgList.append(ul);
+      });
+    }
+
+
+// to animate the gifs and make them still again
+
+function imgClick(j, pThis) {
+     
+      var state = $(pThis).attr("data-state");
+
+        if (state === "still") {
+          $("#img" + j).attr("src", imageSrcAnimated[j]);
+          $(pThis).attr("src", $(pThis).attr("data-animate"));
+          $(pThis).attr("data-state", "animate");
+        } 
+
+        else {
+          $("#img" + j).attr("src", imageSrcStill[j]);
+          $(pThis).attr("src", $(pThis).attr("data-still"));
+          $(pThis).attr("data-state", "still");
+        }
+    }
+
+function addButton() {
+
+    var movie = $("#movie-input").val();
+
+    if (movie && movie.length > 0) {
+      topics.push(movie);
+      buildButtonList();
+    }
+}
+</script>
+
+</body>
+</html>
